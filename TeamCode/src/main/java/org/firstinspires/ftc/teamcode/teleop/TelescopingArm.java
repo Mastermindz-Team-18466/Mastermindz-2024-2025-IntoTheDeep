@@ -5,25 +5,28 @@ import static java.lang.Math.max;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class TelescopingArm {
     private static PIDFController pitchController;
-    private static final double pitchP = 0.01, pitchI = 0, pitchD = 0.0000001;
+    private static final double pitchP = 0.005, pitchI = 0, pitchD = 0.00001;
     private static final double pitchF = 0.00004;
-    private static final int pitchDepositBound = 3000;
-    private static final int pitchIntakeBound = 300;
+    private static final int pitchDepositBound = 2800;
+    private static final int pitchIntakeBound = 0;
     private static final int pitchIntakePosition = 300;
     private static final int pitchDepositPosition = 2000;
-    private static final int pitchSpecimenPosition = 1000;
+    private static final int pitchSpecimenPosition = 2000;
 
     private static PIDFController extensionController;
-    private static final double extensionP = 0, extensionI = 0, extensionD = 0;
-    private static final double extensionF = 0;
+    private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
+    private static final double extensionF = 0.00004;
     private static final double retractedBound = 0;
-    private static final double extendedBound = 0;
+    private static final double extendedBound = 2500;
     private static final double extensionRetractedPosition = 0;
-    private static final double extensionExtendedPosition = 0;
+    private static final double extensionExtendedPosition = 2100;
+    private static final double extensionSpecimanPosition = 1000;
+    private static final double extensionSpecimanDownPosition = 50;
 
     public static DcMotorEx pitch;
     public static DcMotorEx extensionLeft;
@@ -56,8 +59,8 @@ public class TelescopingArm {
         extensionTargetPosition = extensionLeft.getCurrentPosition();
 
         pitch.setDirection(DcMotor.Direction.FORWARD);
-        extensionLeft.setDirection(DcMotor.Direction.FORWARD);
-        extensionRight.setDirection(DcMotor.Direction.REVERSE);
+        extensionLeft.setDirection(DcMotor.Direction.REVERSE);
+        extensionRight.setDirection(DcMotor.Direction.FORWARD);
     }
 
     public static void setPitch() {
@@ -112,6 +115,9 @@ public class TelescopingArm {
     public static void extendFully() {
         extensionTargetPosition = extensionExtendedPosition;
     }
+
+    public static void extendSpeciman() { extensionTargetPosition=extensionSpecimanPosition; }
+    public static void extendSpecimanDown() { extensionTargetPosition=extensionSpecimanDownPosition; }
 
     public static void retractFully() {
         extensionTargetPosition = extensionRetractedPosition;

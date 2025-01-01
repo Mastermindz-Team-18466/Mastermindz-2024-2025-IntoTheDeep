@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static org.firstinspires.ftc.teamcode.teleop.Claw.claw;
+
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -26,23 +29,25 @@ public class TeleOpMode extends LinearOpMode {
     DcMotor rightRear;
     DcMotor rightFront;
     TelescopingArm arm;
-    private Servo intakeLeft;
-    private Servo intakeRight;
-    public static double intakeLeftPosition = 0.5;
-    public static double intakeRightPosition = 0.5;
-    private DcMotorEx left;
-    private DcMotorEx right;
-    private Servo servo;
+    Claw claw;
+    IntakeOuttake intakeOuttake;
+
+    private CRServo left;
+    private CRServo right;
+
+    public static double forwardSpeed = 0.1; // Speed for forward movement
+    public static double reverseSpeed = -0.1; // Speed for reverse movement
+    public static double stopSpeed = 0.0; // Power for stopping servos
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        leftFront = hardwareMap.get(DcMotor.class, "leftFront");
-        leftRear = hardwareMap.get(DcMotor.class, "leftBack");
-        rightRear = hardwareMap.get(DcMotor.class, "rightBack");
-        rightFront = hardwareMap.get(DcMotor.class, "rightFront");
+        leftFront = hardwareMap.get(DcMotor.class, "FrontLeft");
+        leftRear = hardwareMap.get(DcMotor.class, "BackLeft");
+        rightRear = hardwareMap.get(DcMotor.class, "BackRight");
+        rightFront = hardwareMap.get(DcMotor.class, "FrontRight");
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
@@ -52,20 +57,12 @@ public class TeleOpMode extends LinearOpMode {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intakeLeft = hardwareMap.get(Servo.class, "intakeLeft");
-        intakeRight = hardwareMap.get(Servo.class, "intakeRight");
-
-        intakeLeft.setPosition(intakeLeftPosition);
-        intakeRight.setPosition(intakeRightPosition);
-
         arm = new TelescopingArm(hardwareMap);
+        claw = new Claw(hardwareMap);
+        intakeOuttake = new IntakeOuttake(arm, claw);
 
-        left = hardwareMap.get(DcMotorEx.class, "firststring");
-        right = hardwareMap.get(DcMotorEx.class, "secondstring");
-
-        left.setDirection(DcMotorSimple.Direction.FORWARD);
-        right.setDirection(DcMotorSimple.Direction.REVERSE);
-        servo = hardwareMap.get(Servo.class, "servo");
+        left = hardwareMap.get(CRServo.class, "intakeLeft");
+        right = hardwareMap.get(CRServo.class, "intakeRight");
 
         Gamepad currentGamepad1 = new Gamepad();
         Gamepad currentGamepad2 = new Gamepad();
@@ -73,7 +70,8 @@ public class TeleOpMode extends LinearOpMode {
         Gamepad previousGamepad1 = new Gamepad();
         Gamepad previousGamepad2 = new Gamepad();
 
-        double verticalTargetPosition = 0;
+        intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSED);
+        intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
 
         waitForStart();
         runtime.reset();
@@ -117,89 +115,80 @@ public class TeleOpMode extends LinearOpMode {
             rightFront.setPower(frontRightPower);
             rightRear.setPower(backRightPower);
 
-            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
-                verticalTargetPosition = 1600;
-                arm.pitchTo(verticalTargetPosition);
-            }
-            if (currentGamepad1.circle && !previousGamepad1.circle) {
-                verticalTargetPosition = 1700;
-                arm.pitchTo(verticalTargetPosition);
-            }
             if (currentGamepad1.cross && !previousGamepad1.cross) {
-                verticalTargetPosition = 500;
-                arm.pitchTo(verticalTargetPosition);
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
             }
+
+            if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.DEPOSIT);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
+            }
+
+            if (currentGamepad1.options && !previousGamepad1.options) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
+            }
+
+            if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {
+                arm.extendTo(arm.extensionLeft.getCurrentPosition() + 100);
+            }
+
+            if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
+                arm.extendTo(arm.extensionLeft.getCurrentPosition() - 100);
+            }
+
+            if (currentGamepad1.dpad_left && !previousGamepad1.dpad_left) {
+                arm.pitchTo(arm.pitch.getCurrentPosition() - 100);
+            }
+
+            if (currentGamepad1.dpad_right && !previousGamepad1.dpad_right) {
+                arm.pitchTo(arm.pitch.getCurrentPosition() + 100);
+            }
+
+            if (currentGamepad1.circle && !previousGamepad1.circle) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
+            }
+
             if (currentGamepad1.square && !previousGamepad1.square) {
-                verticalTargetPosition = 300;
-                arm.pitchTo(verticalTargetPosition);
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
             }
 
-            if (currentGamepad2.dpad_down && !previousGamepad2.dpad_down) {
-                verticalTargetPosition -= 50;
-                arm.pitchTo(verticalTargetPosition);
+            if (currentGamepad1.share && !previousGamepad1.share) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
             }
 
-            if (currentGamepad2.dpad_up && !previousGamepad2.dpad_up) {
-                verticalTargetPosition += 50;
-                arm.pitchTo(verticalTargetPosition);
+            intakeOuttake.update();
+
+            double leftPower = stopSpeed;
+            double rightPower = stopSpeed;
+
+            if (gamepad2.dpad_up) { // Forward differential movement
+                leftPower = forwardSpeed;
+                rightPower = reverseSpeed;
+            } else if (gamepad2.dpad_down) { // Reverse differential movement
+                leftPower = reverseSpeed;
+                rightPower = forwardSpeed;
+            } else if (gamepad2.dpad_right) { // Forward movement
+                leftPower = forwardSpeed;
+                rightPower = forwardSpeed;
+            } else if (gamepad2.dpad_left) { // Reverse movement
+                leftPower = reverseSpeed;
+                rightPower = reverseSpeed;
             }
 
-            arm.setPitch();
-
-            double newLeftPosition = intakeLeftPosition;
-            double newRightPosition = intakeRightPosition;
-
-            // Adjust positions based on D-Pad input
-            if (gamepad1.dpad_left && !previousGamepad1.dpad_left) {
-                newLeftPosition += 0.02;
-                newRightPosition += 0.02;
-            }
-            if (gamepad1.dpad_right && !previousGamepad1.dpad_right) {
-                newLeftPosition -= 0.02;
-                newRightPosition -= 0.02;
-            }
-            if (gamepad1.dpad_down && !previousGamepad1.dpad_down) {
-                newLeftPosition += 0.02;
-                newRightPosition -= 0.02;
-            }
-            if (gamepad1.dpad_up && !previousGamepad1.dpad_up) {
-                newLeftPosition -= 0.02;
-                newRightPosition += 0.02;
-            }
-
-            boolean leftAtLimit = newLeftPosition < 0 || newLeftPosition > 1;
-            boolean rightAtLimit = newRightPosition < 0 || newRightPosition > 1;
-
-            if (!leftAtLimit && !rightAtLimit) {
-                // Both servos are within bounds
-                intakeLeftPosition = Math.max(0, Math.min(1, newLeftPosition));
-                intakeRightPosition = Math.max(0, Math.min(1, newRightPosition));
-            } else {
-                newLeftPosition = intakeLeftPosition;
-                newRightPosition = intakeRightPosition;
-            }
-
-            // Set servo positions
-            intakeLeft.setPosition(intakeLeftPosition);
-            intakeRight.setPosition(intakeRightPosition);
-
-            if (currentGamepad2.cross && !previousGamepad2.cross) {
-                servo.setPosition(0.7);
-            }
-            if (currentGamepad2.circle && !previousGamepad2.circle){
-                servo.setPosition(0.3);
-            }
-
-            left.setPower(gamepad2.left_stick_y);
-            right.setPower(gamepad2.left_stick_y);
+            // Set power to servos
+            left.setPower(leftPower);
+            right.setPower(rightPower);
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("FrontLeft Power", frontLeftPower);
             telemetry.addData("BackLeft Power", backLeftPower);
             telemetry.addData("FrontRight Power", frontRightPower);
             telemetry.addData("BackRight Power", backRightPower);
-            telemetry.addData("Left Intake: ", intakeLeft.getPosition());
-            telemetry.addData("Right Intake: ", intakeRight.getPosition());
             telemetry.update();
         }
     }
