@@ -24,7 +24,7 @@ public class ServoTest extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        servo = hardwareMap.get(Servo.class, "servo");
+        servo = hardwareMap.get(Servo.class, "intakeRight");
 
         servo.setPosition(position);
     }

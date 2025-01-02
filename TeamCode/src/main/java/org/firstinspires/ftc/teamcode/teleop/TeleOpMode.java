@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -32,12 +31,12 @@ public class TeleOpMode extends LinearOpMode {
     Claw claw;
     IntakeOuttake intakeOuttake;
 
-    private CRServo left;
-    private CRServo right;
+    private Servo left;
+    private Servo right;
 
-    public static double forwardSpeed = 0.1; // Speed for forward movement
-    public static double reverseSpeed = -0.1; // Speed for reverse movement
-    public static double stopSpeed = 0.0; // Power for stopping servos
+    public static double forwardSpeed = 0.1;
+    public static double reverseSpeed = -0.1;
+    public static double stopSpeed = 0.0;
 
     @Override
     public void runOpMode() {
@@ -61,8 +60,8 @@ public class TeleOpMode extends LinearOpMode {
         claw = new Claw(hardwareMap);
         intakeOuttake = new IntakeOuttake(arm, claw);
 
-        left = hardwareMap.get(CRServo.class, "intakeLeft");
-        right = hardwareMap.get(CRServo.class, "intakeRight");
+        left = hardwareMap.get(Servo.class, "intakeLeft");
+        right = hardwareMap.get(Servo.class, "intakeRight");
 
         Gamepad currentGamepad1 = new Gamepad();
         Gamepad currentGamepad2 = new Gamepad();
@@ -88,22 +87,18 @@ public class TeleOpMode extends LinearOpMode {
             double rx = 0;
             if (gamepad1.right_trigger > 0.5){
                 y = -gamepad1.left_stick_y * 1;
-                x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+                x = gamepad1.left_stick_x * 1.1;
                 rx = gamepad1.right_stick_x* 0.75;
             } else if (gamepad1.left_trigger > 0.5) {
-                y = -gamepad1.left_stick_y* 0.3; // Remember, this is reversed!
-                x = gamepad1.left_stick_x * 0.3; // Counteract imperfect strafing
+                y = -gamepad1.left_stick_y* 0.3;
+                x = gamepad1.left_stick_x * 0.3;
                 rx = gamepad1.right_stick_x* 0.2;
             } else {
-                y = -gamepad1.left_stick_y * 0.65; // Remember, this is reversed!
-                x = gamepad1.left_stick_x * 0.65; // Counteract imperfect strafing
+                y = -gamepad1.left_stick_y * 0.65;
+                x = gamepad1.left_stick_x * 0.65;
                 rx = gamepad1.right_stick_x * 0.5;
             }
 
-
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio, but only when
-            // at least one is out of the range [-1, 1]
             double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
             double frontLeftPower = (y + x + rx) / denominator;
             double backLeftPower = (y - x + rx) / denominator;
@@ -163,26 +158,25 @@ public class TeleOpMode extends LinearOpMode {
 
             intakeOuttake.update();
 
-            double leftPower = stopSpeed;
-            double rightPower = stopSpeed;
+            double leftPosition = 0.5;
+            double rightPosition = 0.5;
 
-            if (gamepad2.dpad_up) { // Forward differential movement
-                leftPower = forwardSpeed;
-                rightPower = reverseSpeed;
-            } else if (gamepad2.dpad_down) { // Reverse differential movement
-                leftPower = reverseSpeed;
-                rightPower = forwardSpeed;
-            } else if (gamepad2.dpad_right) { // Forward movement
-                leftPower = forwardSpeed;
-                rightPower = forwardSpeed;
-            } else if (gamepad2.dpad_left) { // Reverse movement
-                leftPower = reverseSpeed;
-                rightPower = reverseSpeed;
+            if (gamepad2.dpad_up) {
+                leftPosition = 1.0;
+                rightPosition = 0.0;
+            } else if (gamepad2.dpad_down) {
+                leftPosition = 0.0;
+                rightPosition = 1.0;
+            } else if (gamepad2.dpad_right) {
+                leftPosition = 1.0;
+                rightPosition = 1.0;
+            } else if (gamepad2.dpad_left) {
+                leftPosition = 0.0;
+                rightPosition = 0.0;
             }
 
-            // Set power to servos
-            left.setPower(leftPower);
-            right.setPower(rightPower);
+            left.setPosition(leftPosition);
+            right.setPosition(rightPosition);
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("FrontLeft Power", frontLeftPower);
@@ -190,6 +184,19 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("FrontRight Power", frontRightPower);
             telemetry.addData("BackRight Power", backRightPower);
             telemetry.update();
+        }
+    }
+
+    public void setDifferentialPosition(String position) {
+        if (position.equals("front")) {
+            left.setPosition(1.0);
+            right.setPosition(0.0);
+        } else if (position.equals("mid")) {
+            left.setPosition(0.5);
+            right.setPosition(0.5);
+        } else if (position.equals("back")) {
+            left.setPosition(0.0);
+            right.setPosition(1.0);
         }
     }
 }
