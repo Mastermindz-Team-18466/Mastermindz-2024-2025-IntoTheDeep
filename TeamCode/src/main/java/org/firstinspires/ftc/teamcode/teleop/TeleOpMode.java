@@ -29,6 +29,7 @@ public class TeleOpMode extends LinearOpMode {
     DcMotor rightFront;
     TelescopingArm arm;
     Claw claw;
+    Differential diffy;
     IntakeOuttake intakeOuttake;
 
     private Servo left;
@@ -58,7 +59,8 @@ public class TeleOpMode extends LinearOpMode {
 
         arm = new TelescopingArm(hardwareMap);
         claw = new Claw(hardwareMap);
-        intakeOuttake = new IntakeOuttake(arm, claw);
+        diffy = new Differential(hardwareMap);
+        intakeOuttake = new IntakeOuttake(arm, claw, diffy);
 
         left = hardwareMap.get(Servo.class, "intakeLeft");
         right = hardwareMap.get(Servo.class, "intakeRight");
@@ -85,14 +87,14 @@ public class TeleOpMode extends LinearOpMode {
             double y = 0;
             double x = 0;
             double rx = 0;
-            if (gamepad1.right_trigger > 0.5){
+            if (gamepad1.right_trigger > 0.5) {
                 y = -gamepad1.left_stick_y * 1;
                 x = gamepad1.left_stick_x * 1.1;
-                rx = gamepad1.right_stick_x* 0.75;
+                rx = gamepad1.right_stick_x * 0.75;
             } else if (gamepad1.left_trigger > 0.5) {
-                y = -gamepad1.left_stick_y* 0.3;
+                y = -gamepad1.left_stick_y * 0.3;
                 x = gamepad1.left_stick_x * 0.3;
-                rx = gamepad1.right_stick_x* 0.2;
+                rx = gamepad1.right_stick_x * 0.2;
             } else {
                 y = -gamepad1.left_stick_y * 0.65;
                 x = gamepad1.left_stick_x * 0.65;
@@ -110,9 +112,9 @@ public class TeleOpMode extends LinearOpMode {
             rightFront.setPower(frontRightPower);
             rightRear.setPower(backRightPower);
 
-            if (currentGamepad1.cross && !previousGamepad1.cross) {
+            if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
-                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
             }
 
             if (currentGamepad1.triangle && !previousGamepad1.triangle) {
@@ -125,25 +127,40 @@ public class TeleOpMode extends LinearOpMode {
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
             }
 
-            if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {
+            if (currentGamepad2.dpad_up && !previousGamepad2.dpad_up) {
                 arm.extendTo(arm.extensionLeft.getCurrentPosition() + 100);
             }
 
-            if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
+            if (currentGamepad2.dpad_down && !previousGamepad2.dpad_down) {
                 arm.extendTo(arm.extensionLeft.getCurrentPosition() - 100);
             }
 
-            if (currentGamepad1.dpad_left && !previousGamepad1.dpad_left) {
+            if (currentGamepad2.dpad_left && !previousGamepad2.dpad_left) {
                 arm.pitchTo(arm.pitch.getCurrentPosition() - 100);
             }
 
-            if (currentGamepad1.dpad_right && !previousGamepad1.dpad_right) {
+            if (currentGamepad2.dpad_right && !previousGamepad2.dpad_right) {
                 arm.pitchTo(arm.pitch.getCurrentPosition() + 100);
             }
 
-            if (currentGamepad1.circle && !previousGamepad1.circle) {
-                intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
-                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
+            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
+                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() + 0.05);
+            }
+
+            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
+                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() + 0.05);
+            }
+
+            if (currentGamepad2.cross && !previousGamepad2.cross) {
+                diffy.setPosition(diffy.left.getPosition() + 0.05, diffy.right.getPosition() - 0.05);
+            }
+
+            if (currentGamepad2.square && !previousGamepad2.square) {
+                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() - 0.05);
+            }
+
+            if (currentGamepad2.circle && !previousGamepad2.circle) {
+                diffy.setPosition(diffy.left.getPosition() + 0.05, diffy.right.getPosition() + 0.05);
             }
 
             if (currentGamepad1.square && !previousGamepad1.square) {
@@ -151,52 +168,33 @@ public class TeleOpMode extends LinearOpMode {
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
             }
 
+            if (currentGamepad1.circle && !previousGamepad1.circle) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
+            }
+
             if (currentGamepad1.share && !previousGamepad1.share) {
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
             }
 
-            intakeOuttake.update();
-
-            double leftPosition = 0.5;
-            double rightPosition = 0.5;
-
-            if (gamepad2.dpad_up) {
-                leftPosition = 1.0;
-                rightPosition = 0.0;
-            } else if (gamepad2.dpad_down) {
-                leftPosition = 0.0;
-                rightPosition = 1.0;
-            } else if (gamepad2.dpad_right) {
-                leftPosition = 1.0;
-                rightPosition = 1.0;
-            } else if (gamepad2.dpad_left) {
-                leftPosition = 0.0;
-                rightPosition = 0.0;
+            if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {
+                if (intakeOuttake.arm.pitch.getCurrentPosition() < 1800 || intakeOuttake.claw.claw.getPosition() == 0) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                }
             }
 
-            left.setPosition(leftPosition);
-            right.setPosition(rightPosition);
+            intakeOuttake.update();
 
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("FrontLeft Power", frontLeftPower);
             telemetry.addData("BackLeft Power", backLeftPower);
             telemetry.addData("FrontRight Power", frontRightPower);
             telemetry.addData("BackRight Power", backRightPower);
+            telemetry.addData("LEFT", diffy.left.getPosition());
+            telemetry.addData("RIGHT", diffy.right.getPosition());
             telemetry.update();
-        }
-    }
-
-    public void setDifferentialPosition(String position) {
-        if (position.equals("front")) {
-            left.setPosition(1.0);
-            right.setPosition(0.0);
-        } else if (position.equals("mid")) {
-            left.setPosition(0.5);
-            right.setPosition(0.5);
-        } else if (position.equals("back")) {
-            left.setPosition(0.0);
-            right.setPosition(1.0);
         }
     }
 }
