@@ -32,13 +32,6 @@ public class TeleOpMode extends LinearOpMode {
     Differential diffy;
     IntakeOuttake intakeOuttake;
 
-    private Servo left;
-    private Servo right;
-
-    public static double forwardSpeed = 0.1;
-    public static double reverseSpeed = -0.1;
-    public static double stopSpeed = 0.0;
-
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -62,9 +55,6 @@ public class TeleOpMode extends LinearOpMode {
         diffy = new Differential(hardwareMap);
         intakeOuttake = new IntakeOuttake(arm, claw, diffy);
 
-        left = hardwareMap.get(Servo.class, "intakeLeft");
-        right = hardwareMap.get(Servo.class, "intakeRight");
-
         Gamepad currentGamepad1 = new Gamepad();
         Gamepad currentGamepad2 = new Gamepad();
 
@@ -73,6 +63,7 @@ public class TeleOpMode extends LinearOpMode {
 
         intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSED);
         intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+        intakeOuttake.update();
 
         waitForStart();
         runtime.reset();
@@ -105,7 +96,7 @@ public class TeleOpMode extends LinearOpMode {
             double frontLeftPower = (y + x + rx) / denominator;
             double backLeftPower = (y - x + rx) / denominator;
             double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower = (y + x - rx) / denominator;
+            double backRightPower = Math.min((y + x - rx) / denominator * 1.42, 1);
 
             leftFront.setPower(frontLeftPower);
             leftRear.setPower(backLeftPower);
@@ -113,54 +104,78 @@ public class TeleOpMode extends LinearOpMode {
             rightRear.setPower(backRightPower);
 
             if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
             }
 
             if (currentGamepad1.triangle && !previousGamepad1.triangle) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.DEPOSIT);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
             }
 
             if (currentGamepad1.options && !previousGamepad1.options) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
             }
 
             if (currentGamepad2.dpad_up && !previousGamepad2.dpad_up) {
-                arm.extendTo(arm.extensionLeft.getCurrentPosition() + 100);
+                arm.extension_offset -= 100;
+            }
+
+            if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {
+                arm.extension_offset -= 100;
             }
 
             if (currentGamepad2.dpad_down && !previousGamepad2.dpad_down) {
-                arm.extendTo(arm.extensionLeft.getCurrentPosition() - 100);
+                arm.extension_offset += 100;
             }
 
             if (currentGamepad2.dpad_left && !previousGamepad2.dpad_left) {
-                arm.pitchTo(arm.pitch.getCurrentPosition() - 100);
+                arm.pitch_offset += 100;
+            }
+
+            if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
+                arm.pitch_offset += 100;
             }
 
             if (currentGamepad2.dpad_right && !previousGamepad2.dpad_right) {
-                arm.pitchTo(arm.pitch.getCurrentPosition() + 100);
-            }
-
-            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
-                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() + 0.05);
-            }
-
-            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
-                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() + 0.05);
+                arm.pitch_offset -= 100;
             }
 
             if (currentGamepad2.cross && !previousGamepad2.cross) {
-                diffy.setPosition(diffy.left.getPosition() + 0.05, diffy.right.getPosition() - 0.05);
+                diffy.left_offset += -0.05;
+                diffy.right_offset += 0.05;
+            }
+
+            if (currentGamepad2.triangle && !previousGamepad2.triangle) {
+                diffy.left_offset += 0.05;
+                diffy.right_offset += -0.05;
             }
 
             if (currentGamepad2.square && !previousGamepad2.square) {
-                diffy.setPosition(diffy.left.getPosition() - 0.05, diffy.right.getPosition() - 0.05);
+                diffy.left_offset += -0.05;
+                diffy.right_offset += -0.05;
             }
 
             if (currentGamepad2.circle && !previousGamepad2.circle) {
-                diffy.setPosition(diffy.left.getPosition() + 0.05, diffy.right.getPosition() + 0.05);
+                diffy.left_offset += 0.05;
+                diffy.right_offset += 0.05;
+            }
+
+            if (currentGamepad1.dpad_left && !previousGamepad1.dpad_left) {
+                diffy.left_offset += -0.05;
+                diffy.right_offset += -0.05;
+            }
+
+            if (currentGamepad1.dpad_right && !previousGamepad1.dpad_right) {
+                diffy.left_offset += 0.05;
+                diffy.right_offset += 0.05;
             }
 
             if (currentGamepad1.square && !previousGamepad1.square) {
@@ -173,13 +188,10 @@ public class TeleOpMode extends LinearOpMode {
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
             }
 
-            if (currentGamepad1.share && !previousGamepad1.share) {
-                intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
-                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
-            }
-
             if (currentGamepad1.right_bumper && !previousGamepad1.right_bumper) {
                 if (intakeOuttake.arm.pitch.getCurrentPosition() < 1800 || intakeOuttake.claw.claw.getPosition() == 0) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                 }

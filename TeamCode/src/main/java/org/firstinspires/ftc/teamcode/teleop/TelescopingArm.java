@@ -14,10 +14,10 @@ public class TelescopingArm {
     private static final double pitchF = 0.00004;
     private static final int pitchDepositBound = 2800;
     private static final int pitchIntakeBound = 0;
-    private static final int pitchIntakePosition = 300;
+    private static final int pitchIntakePosition = 200;
     private static final int pitchDepositPosition = 2000;
-    private static final int pitchSpecimenPosition = 2500;
-
+    private static final int pitchSpecimenPosition = 2700;
+    public static int pitch_offset = 0;
     private static PIDFController extensionController;
     private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
     private static final double extensionF = 0.00004;
@@ -25,8 +25,9 @@ public class TelescopingArm {
     private static final double extendedBound = 2500;
     private static final double extensionRetractedPosition = 0;
     private static final double extensionExtendedPosition = 2100;
-    private static final double extensionSpecimanPosition = 1000;
+    private static final double extensionSpecimanPosition = 50;
     private static final double extensionSpecimanDownPosition = 50;
+    public static int extension_offset = 0;
 
     public static DcMotorEx pitch;
     public static DcMotorEx extensionLeft;
@@ -63,17 +64,22 @@ public class TelescopingArm {
         extensionRight.setDirection(DcMotor.Direction.FORWARD);
     }
 
+    public static void resetOffsets() {
+        extension_offset = 0;
+        pitch_offset = 0;
+    }
+
     public static void setPitch() {
-        if (pitchTargetPosition <= pitchIntakeBound) {
+        if (pitchTargetPosition  <= pitchIntakeBound + pitch_offset) {
             pitchTargetPosition = pitchIntakeBound;
         }
-        if (pitchTargetPosition >= pitchDepositBound) {
+        if (pitchTargetPosition >= pitchDepositBound + pitch_offset) {
             pitchTargetPosition = pitchDepositBound;
         }
 
         pitchController.setPIDF(pitchP, pitchI, pitchD, pitchF);
         double pitchCurrentPosition = pitch.getCurrentPosition();
-        double power = pitchController.calculate(pitchCurrentPosition, pitchTargetPosition) + pitchF;
+        double power = pitchController.calculate(pitchCurrentPosition, pitchTargetPosition - pitch_offset) + pitchF;
         pitch.setPower(power);
     }
 
@@ -94,16 +100,16 @@ public class TelescopingArm {
     }
 
     public static void setExtension() {
-        if (extensionTargetPosition + extensionOffset <= retractedBound) {
+        if (extensionTargetPosition <= retractedBound + extension_offset) {
             extensionTargetPosition = retractedBound;
         }
-        if (extensionTargetPosition + extensionOffset >= extendedBound) {
+        if (extensionTargetPosition >= extendedBound + extension_offset) {
             extensionTargetPosition = extendedBound;
         }
 
         extensionController.setPIDF(extensionP, extensionI, extensionD, extensionF);
         double extensionCurrentPosition = extensionLeft.getCurrentPosition();
-        double power = extensionController.calculate(extensionCurrentPosition + extensionOffset, extensionTargetPosition) + extensionF;
+        double power = extensionController.calculate(extensionCurrentPosition, extensionTargetPosition - extension_offset) + extensionF;
         extensionLeft.setPower(power);
         extensionRight.setPower(power);
     }
