@@ -7,6 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.ServoControllerEx;
 
 @TeleOp
 @Config
@@ -24,7 +26,7 @@ public class ServoTest extends OpMode {
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        servo = hardwareMap.get(Servo.class, "servo");
+        servo = hardwareMap.get(Servo.class, "latch");
 
         servo.setPosition(position);
     }
@@ -39,6 +41,9 @@ public class ServoTest extends OpMode {
         }
         if (currentGamepad1.circle && !previousGamepad1.circle){
             servo.setPosition(onePosition);
+        }
+        if (currentGamepad1.triangle && !previousGamepad1.triangle){
+            servo.getController().pwmDisable();
         }
     }
 }

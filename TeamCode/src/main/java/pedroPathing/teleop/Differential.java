@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Differential {
     static final double[] intake = new double[]{0.85, 0.15};
     static final double[] deposit = new double[]{0.5, 0.5};
-    static final double[] specimanDeposit = new double[]{0.75, 0.85};
-    static final double[] specimanDepositDown = new double[]{0.5, 1};
-    static final double[] mid = new double[]{0.6, 0.4};
+    static final double[] specimanDeposit = new double[]{0.4, 0.6};
+    static final double[] specimanDepositDown = new double[]{0.15, 0.85};
+    static final double[] mid = new double[]{0.875, 0.675};
+    static final double[] close = new double[]{1, 0};
+    static final double[] autoIntake = new double[]{0.7, 0.3};
 
     public static Servo left;
     public static Servo right;
@@ -40,6 +42,15 @@ public class Differential {
     public static void deposit() {
         left_position = deposit[0];
         right_position = deposit[1];
+    }
+
+    public static void close() {
+        left_position = close[0];
+        right_position = close[1];
+    }
+    public static void autoIntake() {
+        left_position = autoIntake[0];
+        right_position = autoIntake[1];
     }
 
     public static void mid() {

@@ -22,6 +22,7 @@ public class TeleOpMode extends LinearOpMode {
     Claw claw;
     Differential diffy;
     IntakeOuttake intakeOuttake;
+    Servo latch;
     public static int extension = 0;
 
     @Override
@@ -47,6 +48,9 @@ public class TeleOpMode extends LinearOpMode {
         diffy = new Differential(hardwareMap);
         intakeOuttake = new IntakeOuttake(arm, claw, diffy);
 
+        latch = hardwareMap.get(Servo.class, "latch");
+        intakeOuttake.arm.pitch_zeroed = true;
+
         Gamepad currentGamepad1 = new Gamepad();
         Gamepad currentGamepad2 = new Gamepad();
 
@@ -55,6 +59,7 @@ public class TeleOpMode extends LinearOpMode {
 
         intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSED);
         intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+        double startTime = System.currentTimeMillis();
 
         telemetry.addData("Left Extension", arm.extensionLeft.getCurrentPosition());
         telemetry.update();
@@ -63,10 +68,15 @@ public class TeleOpMode extends LinearOpMode {
             intakeOuttake.update();
         }
 
-        waitForStart();
         runtime.reset();
+        waitForStart();
 
-        while (opModeIsActive()) {
+        while (isStarted() && opModeIsActive()) {
+            latch.getController().pwmDisable();
+            intakeOuttake.closed_zero_out = false;
+            intakeOuttake.arm.override_pitch = true;
+            intakeOuttake.arm.pitch_zeroed = false;
+
             previousGamepad1.copy(currentGamepad1);
             currentGamepad1.copy(gamepad1);
 
@@ -104,7 +114,6 @@ public class TeleOpMode extends LinearOpMode {
             if (currentGamepad1.left_bumper && !previousGamepad1.left_bumper) {
                 diffy.resetOffsets();
                 arm.resetOffsets();
-                arm.extension_offset = extension;
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
             }
@@ -131,39 +140,39 @@ public class TeleOpMode extends LinearOpMode {
             }
 
             if (currentGamepad1.share && !previousGamepad1.share) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
             }
 
             if (currentGamepad2.dpad_up && !previousGamepad2.dpad_up) {
-                if (intakeOuttake.instruction != IntakeOuttake.Instructions.HOLD) {
-                    arm.extension_offset += 50;
-                } else {
-                     extension += 30;
-                }
+                arm.extension_offset += 100;
             }
 
             if (currentGamepad1.dpad_up && !previousGamepad1.dpad_up) {
-                arm.extension_offset += 30;
+                arm.extension_offset += 100;
             }
 
             if (currentGamepad2.dpad_down && !previousGamepad2.dpad_down) {
-                if (intakeOuttake.instruction != IntakeOuttake.Instructions.HOLD) {
-                    arm.extension_offset -= 30;
-                } else {
-                    extension -= 30;
-                }
+                arm.extension_offset -= 100;
             }
 
             if (currentGamepad2.dpad_left && !previousGamepad2.dpad_left) {
+                arm.pitch_zeroed = false;
+                arm.override_pitch = true;
                 arm.pitch_offset += 100;
             }
 
             if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
+                arm.pitch_zeroed = false;
+                arm.override_pitch = true;
                 arm.pitch_offset += 100;
             }
 
             if (currentGamepad2.dpad_right && !previousGamepad2.dpad_right) {
+                arm.pitch_zeroed = false;
+                arm.override_pitch = true;
                 arm.pitch_offset -= 100;
             }
 

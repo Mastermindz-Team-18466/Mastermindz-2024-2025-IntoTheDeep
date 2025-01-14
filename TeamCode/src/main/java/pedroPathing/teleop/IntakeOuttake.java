@@ -12,6 +12,7 @@ public class IntakeOuttake {
     public SpecificInstructions previousSpecificInstruction;
     private long previous_action = System.currentTimeMillis();
     private double waitTime = 1000;
+    public static boolean closed_zero_out = true;
 
     public IntakeOuttake(TelescopingArm arm, Claw claw, Differential diffy) {
         this.arm = arm;
@@ -20,6 +21,7 @@ public class IntakeOuttake {
 
         instruction = Instructions.CLOSED;
         specificInstruction = SpecificInstructions.CLOSED;
+        closed_zero_out = true;
     }
 
     public void reset(SpecificInstructions next) {
@@ -39,21 +41,15 @@ public class IntakeOuttake {
             case CLOSED:
                 switch (specificInstruction) {
                     case MAX_RETRACT:
-                        diffy.deposit();
+                        diffy.close();
                         claw.close();
-                        reset(SpecificInstructions.PITCH_INTAKE);
-                        break;
-                    case PITCH_INTAKE:
-                        if (System.currentTimeMillis() - previous_action > waitTime && arm.extensionLeft.getCurrentPosition() > -150) {
-                            arm.pitchToIntake();
-                        }
                         break;
                 }
                 break;
             case PITCH_DOWN_CLOSE:
                 switch (specificInstruction) {
                     case PITCH_INTAKE:
-                        arm.pitchTo(150);
+                        arm.pitchTo(25);
                         reset(SpecificInstructions.CLOSE_CLAW);
                         break;
                     case CLOSE_CLAW:
@@ -66,29 +62,53 @@ public class IntakeOuttake {
             case EXTEND_TO_ONE:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        arm.extendTo(-470);
+                        arm.pitchTo(25);
+                        diffy.intake();
+                        claw.open();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 250) {
+                            arm.extendTo(-1200);
+                        }
                         break;
                 }
                 break;
             case EXTEND_TO_TWO:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        arm.extendTo(-520);
+                        arm.pitchTo(25);
+                        diffy.intake();
+                        claw.open();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 250) {
+                            arm.extendTo(-1300);
+                        }
                         break;
                 }
                 break;
             case EXTEND_TO_THREE:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        arm.extendTo(-540);
+                        arm.pitchTo(300);
+                        arm.extendTo(-1350);
+                        diffy.intake();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 250) {
+                            claw.open();
+                        }
                         break;
                 }
                 break;
             case INTAKE:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        arm.pitchTo(400);
-                        arm.extendTo(-80);
+                        arm.pitchTo(0);
+                        arm.extendTo(-500);
                         reset(SpecificInstructions.INTAKE_DIFFY);
                         break;
                     case INTAKE_DIFFY:
@@ -117,20 +137,16 @@ public class IntakeOuttake {
             case HOLD:
                 switch (specificInstruction) {
                     case MAX_RETRACT:
+                        diffy.setPosition(0.2, 0.8);
                         arm.retractFully();
                         reset(SpecificInstructions.PITCH_INTAKE);
                         break;
                     case PITCH_INTAKE:
-                        if (arm.extensionLeft.getCurrentPosition() > -150) {
-                            arm.extendTo(-80);
-                            arm.pitchTo(300);
-                            reset(SpecificInstructions.INTAKE_DIFFY);
+                        if (arm.extensionLeft.getCurrentPosition() > -150 && System.currentTimeMillis() - previous_action > 250) {
+                            arm.retractFully();
+                            arm.pitchToIntake();
                         }
                         break;
-                    case INTAKE_DIFFY:
-                        if (arm.pitch.getCurrentPosition() < 500) {
-                            diffy.setPosition(0.2, 0.8);
-                        }
                 }
                 break;
             case DEPOSIT:
@@ -202,6 +218,20 @@ public class IntakeOuttake {
                         break;
                 }
                 break;
+
+            case AUTO_CLOSE_CLAW:
+                switch (specificInstruction) {
+                    case CLOSE_CLAW:
+                        arm.pitchTo(25);
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 1000) {
+                            claw.close();
+                        }
+                        break;
+                }
+                break;
             
             case CHANGE_DIFFY:
                 switch (specificInstruction) {
@@ -221,8 +251,14 @@ public class IntakeOuttake {
                 break;
         }
 
-        arm.setPitch();
-        arm.setExtension();
+        if (!closed_zero_out) {
+            arm.setPitch();
+            arm.setExtension();
+        } else {
+            arm.extensionLeft.setPower(0);
+            arm.extensionRight.setPower(0);
+            arm.pitch.setPower(0);
+        }
         claw.setClaw();
         diffy.setDifferential();
     }
@@ -242,7 +278,7 @@ public class IntakeOuttake {
         OPEN_CLAW,
         CLOSE_CLAW,
         SPECIMAN_DEPOSIT,
-        SPECIMAN_DEPOSIT_DOWN, HOLD, CHANGE_DIFFY, SPECIMAN_INTAKE, PITCH_DOWN_CLOSE, HORIZ_DIFFY, EXTEND_TO, EXTEND_TO_ONE, EXTEND_TO_TWO, EXTEND_TO_THREE;
+        SPECIMAN_DEPOSIT_DOWN, HOLD, CHANGE_DIFFY, SPECIMAN_INTAKE, PITCH_DOWN_CLOSE, HORIZ_DIFFY, EXTEND_TO, EXTEND_TO_ONE, EXTEND_TO_TWO, EXTEND_TO_THREE, AUTO_CLOSE_CLAW;
     }
 
     public enum SpecificInstructions {

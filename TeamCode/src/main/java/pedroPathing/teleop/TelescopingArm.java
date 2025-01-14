@@ -14,18 +14,19 @@ public class TelescopingArm {
     private static final double pitchF = 0.00004;
     private static final int pitchDepositBound = 2800;
     private static final int pitchIntakeBound = 0;
-    private static final int pitchIntakePosition = 200;
-    private static final int pitchDepositPosition = 1950;
+    private static final int pitchIntakePosition = 0;
+    private static final int pitchDepositPosition = 2000;
     private static final int pitchSpecimenPosition = 2000;
-    private static final int pitchSpecimenIntake = 520;
+    private static final int pitchSpecimenIntake = 301;
     public static int pitch_offset = 0;
+    public static boolean override_pitch = false;
     private static PIDFController extensionController;
-    private static final double extensionP = 0.0025, extensionI = 0, extensionD = 0.00005;
+    private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
     private static final double extensionF = 0.00004;
     private static final double retractedBound = -50;
-    private static final double extendedBound = -600;
+    private static final double extendedBound = -1550;
     private static final double extensionRetractedPosition = -50;
-    private static final double extensionExtendedPosition = -600;
+    private static final double extensionExtendedPosition = -1520;
     private static final double extensionSpecimanPosition = -50;
     private static final double extensionSpecimanDownPosition = -50;
     public static int extension_offset = 0;
@@ -36,6 +37,7 @@ public class TelescopingArm {
 
     public static double pitchTargetPosition = 0;
     public static double extensionTargetPosition = 0;
+    public static boolean pitch_zeroed = false;
 
     public TelescopingArm(HardwareMap hardwareMap) {
         pitchController = new PIDFController(pitchP, pitchI, pitchD, pitchF);
@@ -45,7 +47,6 @@ public class TelescopingArm {
         extensionLeft = hardwareMap.get(DcMotorEx.class, "firststring");
         extensionRight = hardwareMap.get(DcMotorEx.class, "secondstring");
 
-        pitch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         pitch.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         pitch.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -71,6 +72,8 @@ public class TelescopingArm {
     public static void resetOffsets() {
         extension_offset = 0;
         pitch_offset = 0;
+        override_pitch = false;
+        pitch_zeroed = false;
     }
 
     public static void setPitch() {
@@ -84,6 +87,13 @@ public class TelescopingArm {
         pitchController.setPIDF(pitchP, pitchI, pitchD, pitchF);
         double pitchCurrentPosition = pitch.getCurrentPosition();
         double power = pitchController.calculate(pitchCurrentPosition, pitchTargetPosition - pitch_offset) + pitchF;
+
+        if (!override_pitch && pitchCurrentPosition < 100 && pitchTargetPosition < 300) {
+            pitch_zeroed = true;
+        }
+
+        if (pitch_zeroed) power = 0;
+
         pitch.setPower(power);
     }
 
