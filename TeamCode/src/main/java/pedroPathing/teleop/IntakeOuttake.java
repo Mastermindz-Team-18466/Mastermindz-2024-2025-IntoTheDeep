@@ -84,7 +84,7 @@ public class IntakeOuttake {
                         break;
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250) {
-                            arm.extendTo(-1300);
+                            arm.extendTo(-1350);
                         }
                         break;
                 }
@@ -92,14 +92,14 @@ public class IntakeOuttake {
             case EXTEND_TO_THREE:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        arm.pitchTo(300);
-                        arm.extendTo(-1350);
+                        arm.pitchTo(25);
                         diffy.intake();
+                        claw.open();
                         reset(SpecificInstructions.INTAKE_DIFFY);
                         break;
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250) {
-                            claw.open();
+                            arm.extendTo(-1320);
                         }
                         break;
                 }
@@ -222,13 +222,7 @@ public class IntakeOuttake {
             case AUTO_CLOSE_CLAW:
                 switch (specificInstruction) {
                     case CLOSE_CLAW:
-                        arm.pitchTo(25);
-                        reset(SpecificInstructions.INTAKE_DIFFY);
-                        break;
-                    case INTAKE_DIFFY:
-                        if (System.currentTimeMillis() - previous_action > 1000) {
-                            claw.close();
-                        }
+                        claw.close();
                         break;
                 }
                 break;
