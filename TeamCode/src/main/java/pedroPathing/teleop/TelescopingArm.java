@@ -15,9 +15,9 @@ public class TelescopingArm {
     private static final int pitchDepositBound = 2800;
     private static final int pitchIntakeBound = 0;
     private static final int pitchIntakePosition = 0;
-    private static final int pitchDepositPosition = 2000;
-    private static final int pitchSpecimenPosition = 2000;
-    private static final int pitchSpecimenIntake = 301;
+    private static final int pitchDepositPosition = 1900;
+    private static final int pitchSpecimenPosition = 1900;
+    private static final int pitchSpecimenIntake = 270;
     public static int pitch_offset = 0;
     public static boolean override_pitch = false;
     private static PIDFController extensionController;
@@ -88,7 +88,7 @@ public class TelescopingArm {
         double pitchCurrentPosition = pitch.getCurrentPosition();
         double power = pitchController.calculate(pitchCurrentPosition, pitchTargetPosition - pitch_offset) + pitchF;
 
-        if (!override_pitch && pitchCurrentPosition < 100 && pitchTargetPosition < 300) {
+        if (!override_pitch && pitchCurrentPosition < 100 && pitchTargetPosition < 200) {
             pitch_zeroed = true;
         }
 

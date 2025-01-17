@@ -74,6 +74,21 @@ public class IntakeOuttake {
                         break;
                 }
                 break;
+            case EXTEND_TO_ONE_SPEC:
+                switch (specificInstruction) {
+                    case INTAKE_EXTENSION:
+                        arm.pitchTo(25);
+                        arm.extendTo(-880);
+                        claw.open();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 1000) {
+                            diffy.setPosition(0.75, 0.05);
+                        }
+                        break;
+                }
+                break;
             case EXTEND_TO_TWO:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
@@ -86,6 +101,35 @@ public class IntakeOuttake {
                         if (System.currentTimeMillis() - previous_action > 250) {
                             arm.extendTo(-1350);
                         }
+                        break;
+                }
+                break;
+            case EXTEND_TO_TWO_SPEC:
+                switch (specificInstruction) {
+                    case INTAKE_EXTENSION:
+                        arm.pitchTo(25);
+                        diffy.setPosition(0.75, 0.05);
+                        claw.open();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 250) {
+                            arm.extendTo(-880);
+                        }
+                        break;
+                }
+                break;
+            case EXTEND_TO_DROP:
+                switch (specificInstruction) {
+                    case INTAKE_EXTENSION:
+                        arm.extendTo(-880);
+                        break;
+                }
+                break;
+            case PRE_EXTEND_TWO:
+                switch (specificInstruction) {
+                    case INTAKE_EXTENSION:
+                        arm.extendTo(-880);
                         break;
                 }
                 break;
@@ -183,6 +227,20 @@ public class IntakeOuttake {
                         break;
                 }
                 break;
+            case FRONT_SPECIMAN_DEPOSIT:
+                switch (specificInstruction) {
+                    case PITCH_DEPOSIT:
+                        diffy.setPosition(0.725, 0.825);
+                        arm.pitchTo(800);
+                        reset(SpecificInstructions.SPECIMAN_EXTEND);
+                        break;
+                    case SPECIMAN_EXTEND:
+                        if (arm.pitch.getCurrentPosition() > 750) {
+                            arm.extendTo(-625);
+                        }
+                        break;
+                }
+                break;
             case SPECIMAN_DEPOSIT_DOWN:
                 switch (specificInstruction) {
                     case SPECIMAN_EXTEND:
@@ -199,6 +257,19 @@ public class IntakeOuttake {
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250 && claw.claw.getPosition() == 0) {
                             diffy.intake();
+                        }
+                        break;
+                }
+                break;
+            case SPEC_OPEN_CLAW:
+                switch (specificInstruction) {
+                    case OPEN_CLAW:
+                        claw.open();
+                        reset(SpecificInstructions.INTAKE_DIFFY);
+                        break;
+                    case INTAKE_DIFFY:
+                        if (System.currentTimeMillis() - previous_action > 250 && claw.claw.getPosition() == 0) {
+                            diffy.deposit();
                         }
                         break;
                 }
@@ -272,7 +343,7 @@ public class IntakeOuttake {
         OPEN_CLAW,
         CLOSE_CLAW,
         SPECIMAN_DEPOSIT,
-        SPECIMAN_DEPOSIT_DOWN, HOLD, CHANGE_DIFFY, SPECIMAN_INTAKE, PITCH_DOWN_CLOSE, HORIZ_DIFFY, EXTEND_TO, EXTEND_TO_ONE, EXTEND_TO_TWO, EXTEND_TO_THREE, AUTO_CLOSE_CLAW;
+        SPECIMAN_DEPOSIT_DOWN, HOLD, CHANGE_DIFFY, SPECIMAN_INTAKE, PITCH_DOWN_CLOSE, HORIZ_DIFFY, EXTEND_TO, EXTEND_TO_ONE, EXTEND_TO_TWO, EXTEND_TO_THREE, AUTO_CLOSE_CLAW, FRONT_SPECIMAN_DEPOSIT, EXTEND_TO_ONE_SPEC, SPEC_OPEN_CLAW, EXTEND_TO_TWO_SPEC, EXTEND_TO_DROP, PRE_EXTEND_TWO;
     }
 
     public enum SpecificInstructions {
