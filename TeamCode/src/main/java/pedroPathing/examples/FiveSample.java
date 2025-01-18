@@ -59,11 +59,11 @@ public class FiveSample extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     private final Pose startPose = new Pose(-1, 0, Math.toRadians(0));
-    private final Pose scorePose = new Pose(4.5, 14.5, Math.toRadians(-45));
-    private final Pose depositPose = new Pose(4.5, 14.5, Math.toRadians(-45));
+    private final Pose scorePose = new Pose(1.5, 17.5, Math.toRadians(-45));
+    private final Pose depositPose = new Pose(1.5, 17.5, Math.toRadians(-45));
     private final Pose one = new Pose(4.5, 14.5, Math.toRadians(-7.5));
-    private final Pose two = new Pose(4.5, 14.5, Math.toRadians(12.2));
-    private final Pose three = new Pose(7.2, 15.2, Math.toRadians(29.3));
+    private final Pose two = new Pose(4.5, 14.5, Math.toRadians(13.5));
+    private final Pose three = new Pose(7.2, 15.2, Math.toRadians(35));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scorePreload, deposit, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;
@@ -141,7 +141,7 @@ public class FiveSample extends OpMode {
                 break;
             case 3:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && intakeOuttake.arm.extensionLeft.getCurrentPosition() < -1500 &&  follower.getPose().getX() > (depositPose.getX() - 2) && follower.getPose().getY() > (depositPose.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.arm.extensionLeft.getCurrentPosition() < -1500 &&  follower.getPose().getX() > (depositPose.getX() - 2) && follower.getPose().getY() > (depositPose.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
                     setPathState(4);
@@ -152,7 +152,7 @@ public class FiveSample extends OpMode {
                 break;
             case 5:
                 if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.DOWN_HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(6);
                 }
@@ -164,7 +164,7 @@ public class FiveSample extends OpMode {
                 }
                 break;
             case 7:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.EXTEND_TO_ONE);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
                     setPathState(8);
@@ -186,7 +186,7 @@ public class FiveSample extends OpMode {
                 break;
             case 10:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
                     follower.followPath(deposit, true);
                     setPathState(11);
                 }
@@ -213,7 +213,7 @@ public class FiveSample extends OpMode {
                 break;
             case 14:
                 if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.DOWN_HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(15);
                 }
@@ -225,21 +225,21 @@ public class FiveSample extends OpMode {
                 }
                 break;
             case 16:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.EXTEND_TO_TWO);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
                     setPathState(17);
                 }
                 break;
             case 17:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_CLOSE_CLAW);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
                     setPathState(18);
                 }
                 break;
             case 18:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.8 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.8 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(19);
@@ -247,7 +247,7 @@ public class FiveSample extends OpMode {
                 break;
             case 19:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
                     follower.followPath(deposit, true);
                     setPathState(20);
                 }
@@ -274,7 +274,7 @@ public class FiveSample extends OpMode {
                 break;
             case 23:
                 if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.DOWN_HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(24);
                 }
@@ -335,7 +335,7 @@ public class FiveSample extends OpMode {
                 break;
             case 32:
                 if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.DOWN_HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(33);
                 }

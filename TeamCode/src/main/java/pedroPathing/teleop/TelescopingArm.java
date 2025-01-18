@@ -17,9 +17,9 @@ public class TelescopingArm {
     private static final int pitchIntakePosition = 0;
     private static final int pitchDepositPosition = 1900;
     private static final int pitchSpecimenPosition = 1900;
-    private static final int pitchSpecimenIntake = 270;
+    private static final int pitchSpecimenIntake = 290;
     public static int pitch_offset = 0;
-    public static boolean override_pitch = false;
+    public static boolean override_pitch = false;gut
     private static PIDFController extensionController;
     private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
     private static final double extensionF = 0.00004;
