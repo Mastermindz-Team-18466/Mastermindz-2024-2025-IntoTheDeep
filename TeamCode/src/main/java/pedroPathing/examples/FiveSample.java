@@ -59,8 +59,8 @@ public class FiveSample extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     private final Pose startPose = new Pose(-1, 0, Math.toRadians(0));
-    private final Pose scorePose = new Pose(1.5, 17.5, Math.toRadians(-45));
-    private final Pose depositPose = new Pose(1.5, 17.5, Math.toRadians(-45));
+    private final Pose scorePose = new Pose(2, 17, Math.toRadians(-45));
+    private final Pose depositPose = new Pose(2, 17, Math.toRadians(-45));
     private final Pose one = new Pose(4.5, 14.5, Math.toRadians(-7.5));
     private final Pose two = new Pose(4.5, 14.5, Math.toRadians(13.5));
     private final Pose three = new Pose(7.2, 15.2, Math.toRadians(35));

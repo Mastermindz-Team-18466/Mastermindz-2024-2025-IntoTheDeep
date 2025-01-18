@@ -62,11 +62,11 @@ public class FourSpecimen extends OpMode {
     private final Pose midScorePose = new Pose(5.2, 0, Math.toRadians(0));
     private final Pose scorePose = new Pose(19.5, 0, Math.toRadians(0));
     private final Pose intakePose1 = new Pose(11, -8, Math.toRadians(-30));
-    private final Pose specimenPose1 = new Pose(16, -9.8, Math.toRadians(-62.5));
-    private final Pose specimenPose1Deposit = new Pose(15.48, -10.3, Math.toRadians(-133.6));
-    private final Pose specimenPose2 = new Pose(17, -17.3, Math.toRadians(-63.2));
-    private final Pose specimenPose2Deposit = new Pose(13.05, -8.82, Math.toRadians(-137.7));
-    private final Pose pickUp = new Pose(7.1, -13.5, Math.toRadians(-180));
+    private final Pose specimenPose1 = new Pose(14.5, -11, Math.toRadians(-62.5));
+    private final Pose specimenPose1Deposit = new Pose(14.48, -12.3, Math.toRadians(-133.6));
+    private final Pose specimenPose2 = new Pose(16, -17.3, Math.toRadians(-63.2));
+    private final Pose specimenPose2Deposit = new Pose(13.05, -12.82, Math.toRadians(-137.7));
+    private final Pose pickUp = new Pose(7.1, -21.5, Math.toRadians(-180));
     private final Pose scorePose1 = new Pose(15.5, 5, Math.toRadians(-180));
     private final Pose backPose = new Pose(19.5, 5, Math.toRadians(-180));
     private final Pose forwardPose = new Pose(17, 5, Math.toRadians(-180));

@@ -69,7 +69,7 @@ public class IntakeOuttake {
                         break;
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250) {
-                            arm.extendTo(-1200);
+                            arm.extendTo(-1170);
                         }
                         break;
                 }
@@ -99,7 +99,7 @@ public class IntakeOuttake {
                         break;
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250) {
-                            arm.extendTo(-1300);
+                            arm.extendTo(-1280);
                         }
                         break;
                 }
@@ -143,7 +143,7 @@ public class IntakeOuttake {
                         break;
                     case INTAKE_DIFFY:
                         if (System.currentTimeMillis() - previous_action > 250) {
-                            arm.extendTo(-1320);
+                            arm.extendTo(-1310);
                         }
                         break;
                 }
@@ -251,7 +251,7 @@ public class IntakeOuttake {
                 switch (specificInstruction) {
                     case PITCH_DEPOSIT:
                         diffy.setPosition(0.725, 0.825);
-                        arm.pitchTo(750);
+                        arm.pitchTo(775);
                         reset(SpecificInstructions.SPECIMAN_EXTEND);
                         break;
                     case SPECIMAN_EXTEND:
