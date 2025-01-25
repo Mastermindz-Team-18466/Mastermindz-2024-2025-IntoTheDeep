@@ -19,6 +19,7 @@ public class TeleOpMode extends LinearOpMode {
     DcMotor rightRear;
     DcMotor rightFront;
     TelescopingArm arm;
+    Pusher pusher;
     Claw claw;
     Differential diffy;
     IntakeOuttake intakeOuttake;
@@ -46,7 +47,10 @@ public class TeleOpMode extends LinearOpMode {
         arm = new TelescopingArm(hardwareMap);
         claw = new Claw(hardwareMap);
         diffy = new Differential(hardwareMap);
-        intakeOuttake = new IntakeOuttake(arm, claw, diffy);
+        pusher = new Pusher(hardwareMap);
+        intakeOuttake = new IntakeOuttake(arm, claw, diffy, pusher);
+
+        pusher = new Pusher(hardwareMap);
 
         latch = hardwareMap.get(Servo.class, "latch");
         intakeOuttake.arm.pitch_zeroed = true;
@@ -66,16 +70,15 @@ public class TeleOpMode extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested() && !opModeIsActive()) {
             intakeOuttake.update();
+            pusher.close();
+            pusher.setPusher();
         }
 
         runtime.reset();
         waitForStart();
 
         while (isStarted() && opModeIsActive()) {
-            latch.getController().pwmDisable();
             intakeOuttake.closed_zero_out = false;
-            intakeOuttake.arm.override_pitch = true;
-            intakeOuttake.arm.pitch_zeroed = false;
 
             previousGamepad1.copy(currentGamepad1);
             currentGamepad1.copy(gamepad1);
@@ -164,12 +167,6 @@ public class TeleOpMode extends LinearOpMode {
                 arm.pitch_offset += 100;
             }
 
-            if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
-                arm.pitch_zeroed = false;
-                arm.override_pitch = true;
-                arm.pitch_offset += 100;
-            }
-
             if (currentGamepad2.dpad_right && !previousGamepad2.dpad_right) {
                 arm.pitch_zeroed = false;
                 arm.override_pitch = true;
@@ -206,6 +203,38 @@ public class TeleOpMode extends LinearOpMode {
                 diffy.right_offset += 0.05;
             }
 
+            if (currentGamepad1.left_stick_button && !previousGamepad1.left_stick_button) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
+                diffy.ninety = !diffy.ninety;
+            }
+
+            if (currentGamepad1.dpad_down && !previousGamepad1.dpad_down) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
+                if (pusher.opened) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_PUSHER);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                } else {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_PUSHER);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                }
+            }
+
+            if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.SUPER_PUSHER);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+            }
+
+            if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {
+                diffy.resetOffsets();
+                arm.resetOffsets();
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+            }
+
             if (currentGamepad1.square && !previousGamepad1.square) {
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
@@ -236,6 +265,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("LEFT", diffy.left.getPosition());
             telemetry.addData("RIGHT", diffy.right.getPosition());
             telemetry.addData("Left Extension", arm.extensionLeft.getCurrentPosition());
+            telemetry.addData("Pitch", arm.pitch.getCurrentPosition());
             telemetry.update();
         }
     }

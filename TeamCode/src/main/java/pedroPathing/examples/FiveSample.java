@@ -13,6 +13,7 @@ import com.pedropathing.util.Drawing;
 import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import  com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import pedroPathing.constants.FConstants;
@@ -20,6 +21,7 @@ import pedroPathing.constants.LConstants;
 import pedroPathing.teleop.Claw;
 import pedroPathing.teleop.Differential;
 import pedroPathing.teleop.IntakeOuttake;
+import pedroPathing.teleop.Pusher;
 import pedroPathing.teleop.TelescopingArm;
 
 /**
@@ -44,6 +46,8 @@ public class FiveSample extends OpMode {
     private Differential diffy;
     private Claw claw;
     private Servo latch;
+    private Pusher pusher;
+    private PwmControl pwmControl;
 
     /** This is the variable where we store the state of our auto.
      * It is used by the pathUpdate method. */
@@ -118,6 +122,7 @@ public class FiveSample extends OpMode {
             case 0:
                 intakeOuttake.closed_zero_out = false;
                 intakeOuttake.arm.override_pitch = true;
+                pwmControl.setPwmDisable();
                 intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                 intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                 follower.followPath(scorePreload, true);
@@ -178,7 +183,7 @@ public class FiveSample extends OpMode {
                 }
                 break;
             case 9:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.8 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.3 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(10);
@@ -239,7 +244,7 @@ public class FiveSample extends OpMode {
                 }
                 break;
             case 18:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.8 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.3 && follower.getPose().getX() > (two.getX() - 2) && follower.getPose().getY() > (two.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(19);
@@ -300,7 +305,7 @@ public class FiveSample extends OpMode {
                 }
                 break;
             case 27:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.8 && follower.getPose().getX() > (three.getX() - 2) && follower.getPose().getY() > (three.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 1 && intakeOuttake.claw.claw.getPosition() > 0.3 && follower.getPose().getX() > (three.getX() - 2) && follower.getPose().getY() > (three.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(28);
@@ -388,7 +393,8 @@ public class FiveSample extends OpMode {
         arm = new TelescopingArm(hardwareMap);
         claw = new Claw(hardwareMap);
         diffy = new Differential(hardwareMap);
-        intakeOuttake = new IntakeOuttake(arm, claw, diffy);
+        pusher = new Pusher(hardwareMap);
+        intakeOuttake = new IntakeOuttake(arm, claw, diffy, pusher);
 
         poseUpdater = new PoseUpdater(hardwareMap);
         dashboardPoseTracker = new DashboardPoseTracker(poseUpdater);
@@ -411,6 +417,10 @@ public class FiveSample extends OpMode {
 
         intakeOuttake.arm.pitch_zeroed = true;
         latch = hardwareMap.get(Servo.class, "latch");
+
+        if (latch instanceof PwmControl) {
+            pwmControl = (PwmControl) latch;
+        }
 
         while (System.currentTimeMillis() - startTime <= 5000) { }
 

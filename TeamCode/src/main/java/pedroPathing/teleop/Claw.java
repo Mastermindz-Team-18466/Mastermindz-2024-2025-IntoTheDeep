@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Claw {
     private static final int open = 0;
-    private static final int close = 1;
+    public static double close = 0.31;
     public static Servo claw;
     public static double position = 1;
 
@@ -19,11 +19,20 @@ public class Claw {
         claw.setPosition(position);
     }
 
+    public static void full() {
+        close = 1;
+    }
+
+    public static void half() {
+        close = 0.31;
+    }
+
     public static void open() {
         position = open;
     }
 
     public static void close() {
+
         position = close;
     }
 }

@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.PwmControl;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.ServoControllerEx;
@@ -17,16 +18,24 @@ public class ServoTest extends OpMode {
     public static double position = 0.5;
     public static double zeroPosition = 0;
     public static double onePosition = 1;
+    public static String name = "latch";
 
     Gamepad currentGamepad1 = new Gamepad();
     Gamepad previousGamepad1 = new Gamepad();
     public boolean zeroed = true;
+    PwmControl pwmControl;
 
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        servo = hardwareMap.get(Servo.class, "latch");
+        servo = hardwareMap.get(Servo.class, name);
+
+        if (servo instanceof PwmControl) {
+            pwmControl = (PwmControl) servo;
+        }
+
+        pwmControl.setPwmEnable();
 
         servo.setPosition(position);
     }
@@ -43,7 +52,7 @@ public class ServoTest extends OpMode {
             servo.setPosition(onePosition);
         }
         if (currentGamepad1.triangle && !previousGamepad1.triangle){
-            servo.getController().pwmDisable();
+            pwmControl.setPwmDisable();
         }
     }
 }

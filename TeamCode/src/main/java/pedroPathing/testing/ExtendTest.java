@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+
 @TeleOp
 @Config
 public class ExtendTest extends OpMode {
@@ -20,6 +22,7 @@ public class ExtendTest extends OpMode {
     public static double targetPosition = 0;
     private DcMotorEx left;
     private DcMotorEx right;
+    public static boolean stopped = false;
 
     @Override
     public void init() {
@@ -42,11 +45,22 @@ public class ExtendTest extends OpMode {
 
         double power = pid + f;
 
-        left.setPower(power);
-        right.setPower(power);
+        if (left.getCurrent(CurrentUnit.AMPS) > 6) {
+            stopped = true;
+        }
+
+        if (!stopped) {
+            left.setPower(power);
+            right.setPower(power);
+        } else {
+            left.setPower(0);
+            right.setPower(0);
+        }
+
 
         telemetry.addData("targetPos", targetPosition);
         telemetry.addData("currentPos", slidePos);
+        telemetry.addData("current", left.getCurrent(CurrentUnit.AMPS));
         telemetry.update();
     }
 }
