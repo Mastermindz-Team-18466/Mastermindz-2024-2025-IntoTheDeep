@@ -15,20 +15,20 @@ public class FConstants {
         FollowerConstants.rightFrontMotorName = "rightFront";
         FollowerConstants.rightRearMotorName = "rightRear";
 
-        FollowerConstants.leftFrontMotorDirection = DcMotorSimple.Direction.REVERSE;
+        FollowerConstants.leftFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
         FollowerConstants.leftRearMotorDirection = DcMotorSimple.Direction.REVERSE;
         FollowerConstants.rightFrontMotorDirection = DcMotorSimple.Direction.FORWARD;
-        FollowerConstants.rightRearMotorDirection = DcMotorSimple.Direction.FORWARD;
+        FollowerConstants.rightRearMotorDirection = DcMotorSimple.Direction.REVERSE;
 
 
 
         FollowerConstants.mass = 13;
 
-        FollowerConstants.xMovement = 41.49673034800769;
-        FollowerConstants.yMovement = 28.79013076575233;
+        FollowerConstants.xMovement = 43.32357890542022;
+        FollowerConstants.yMovement = 36.05886126486019;
 
-        FollowerConstants.forwardZeroPowerAcceleration = -28.079675794976563;
-        FollowerConstants.lateralZeroPowerAcceleration = -62.090245431249414;
+        FollowerConstants.forwardZeroPowerAcceleration = -31.38996691615139;
+        FollowerConstants.lateralZeroPowerAcceleration = -57.68302694976858;
         FollowerConstants.translationalPIDFCoefficients = new CustomPIDFCoefficients(0.1,0,0.01,0);
         FollowerConstants.useSecondaryTranslationalPID = false;
         FollowerConstants.secondaryTranslationalPIDFCoefficients = new CustomPIDFCoefficients(0.1,0,0.01,0); // Not being used, @see useSecondaryTranslationalPID

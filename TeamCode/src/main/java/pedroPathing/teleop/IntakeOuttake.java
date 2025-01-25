@@ -52,16 +52,11 @@ public class IntakeOuttake {
             case AUTO_INTAKE:
                 switch (specificInstruction) {
                     case PUSHER_OPEN:
-                        arm.extendTo(-200);
+                        claw.full();
+                        arm.extendTo(-225);
                         pusher.open();
                         claw.open();
                         diffy.intake();
-                        reset(SpecificInstructions.CLOSE_CLAW);
-                        break;
-                    case CLOSE_CLAW:
-                        if (System.currentTimeMillis() - previous_action > 1000) {
-                            claw.close();
-                        }
                         break;
                 }
                 break;
@@ -198,7 +193,7 @@ public class IntakeOuttake {
             case INTAKE:
                 switch (specificInstruction) {
                     case INTAKE_EXTENSION:
-                        claw.half();
+                        claw.full();
                         arm.pitchTo(0);
                         arm.extendTo(-500);
                         reset(SpecificInstructions.INTAKE_DIFFY);
@@ -230,6 +225,7 @@ public class IntakeOuttake {
             case HOLD:
                 switch (specificInstruction) {
                     case MAX_RETRACT:
+                        claw.half();
                         diffy.setPosition(0.2, 0.8);
                         arm.retractFully();
                         reset(SpecificInstructions.PITCH_INTAKE);
@@ -245,6 +241,7 @@ public class IntakeOuttake {
             case AUTO_HOLD:
                 switch (specificInstruction) {
                     case MAX_RETRACT:
+                        claw.half();
                         arm.retractFully();
                         reset(SpecificInstructions.PITCH_INTAKE);
                         break;

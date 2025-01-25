@@ -64,12 +64,15 @@ public class FiveSpecimen extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
-    private final Pose scorePose = new Pose(20, 6, Math.toRadians(180));
-    private final Pose one = new Pose(7, -10, Math.toRadians(315));
-    private final Pose oneGo = new Pose(14, -19, Math.toRadians(315));
+    private final Pose scorePose = new Pose(19, 6, Math.toRadians(180));
+    private final Pose one = new Pose(12, -10, Math.toRadians(315));
+    private final Pose oneGo = new Pose(14, -19.5, Math.toRadians(315));
+    private final Pose depoOne = new Pose(14, -19.5, Math.toRadians(225));
+    private final Pose twoGo = new Pose(14, -29.5, Math.toRadians(315));
+    private final Pose depoTwo = new Pose(14, -29.5, Math.toRadians(225));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private Path scorePreload, goToOne, goToOneStraight, deposit, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;
+    private Path scorePreload, goToOne, goToOneStraight, goToDepoOne, goToTwo, goToDepoTwo, deposit, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -99,6 +102,15 @@ public class FiveSpecimen extends OpMode {
 
         goToOneStraight = new Path(new BezierLine(new Point(one), new Point(oneGo)));
         goToOneStraight.setLinearHeadingInterpolation(one.getHeading(), oneGo.getHeading());
+
+        goToDepoOne = new Path(new BezierLine(new Point(oneGo), new Point(depoOne)));
+        goToDepoOne.setConstantHeadingInterpolation(depoOne.getHeading());
+
+        goToTwo = new Path(new BezierLine(new Point(depoOne), new Point(twoGo)));
+        goToTwo.setLinearHeadingInterpolation(depoOne.getHeading(), twoGo.getHeading());
+
+        goToDepoTwo = new Path(new BezierLine(new Point(twoGo), new Point(depoTwo)));
+        goToDepoTwo.setConstantHeadingInterpolation(depoTwo.getHeading());
 
         nothing = new Path(new BezierLine(new Point(oneGo), new Point(oneGo)));
         nothing.setLinearHeadingInterpolation(oneGo.getHeading(), oneGo.getHeading());
@@ -156,9 +168,86 @@ public class FiveSpecimen extends OpMode {
                 }
                 break;
             case 6:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if(pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                    setPathState(7);
+                }
+                break;
+            case 7:
+                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+                    setPathState(8);
+                }
+                break;
+            case 8:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                    setPathState(9);
+                }
+                break;
+            case 9:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    follower.followPath(goToDepoOne);
+                    setPathState(10);
+                }
+                break;
+            case 10:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
+                    setPathState(11);
+                }
+                break;
+            case 11:
+                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                    setPathState(12);
+                }
+                break;
+            case 12:
+                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.SUPER_PUSHER);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                    follower.followPath(goToTwo, true);
+                    setPathState(13);
+                }
+                break;
+            case 13:
+                if(pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                    setPathState(14);
+                }
+                break;
+            case 14:
+                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+                    setPathState(15);
+                }
+                break;
+            case 15:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                    setPathState(16);
+                }
+                break;
+            case 16:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    follower.followPath(goToDepoTwo);
+                    setPathState(17);
+                }
+                break;
+            case 17:
+                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
+                    setPathState(-1);
                 }
                 break;
         }
