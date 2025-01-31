@@ -15,8 +15,8 @@ public class TelescopingArm {
     private static final int pitchDepositBound = 2800;
     private static final int pitchIntakeBound = 0;
     private static final int pitchIntakePosition = 0;
-    private static final int pitchDepositPosition = 1900;
-    private static final int pitchSpecimenPosition = 1900;
+    private static final int pitchDepositPosition = 2000;
+    private static final int pitchSpecimenPosition = 2000;
     private static final int pitchSpecimenIntake = 25;
     public static int pitch_offset = 0;
     public static boolean override_pitch = false;
@@ -24,7 +24,7 @@ public class TelescopingArm {
     private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
     private static final double extensionF = 0.00004;
     private static final double retractedBound = -50;
-    private static final double extendedBound = -1550;
+    private static final double extendedBound = -1520;
     private static final double extensionRetractedPosition = -50;
     private static final double extensionExtendedPosition = -1520;
     private static final double extensionSpecimanPosition = -150;
@@ -103,7 +103,7 @@ public class TelescopingArm {
     }
 
     public static void pitchToDeposit() {
-        if (pitch.getCurrentPosition() < 500) {
+        if (pitch.getCurrentPosition() - pitch_home < 300) {
             pitch_home = pitch.getCurrentPosition();
         }
         pitchTargetPosition = pitchDepositPosition;
@@ -116,7 +116,7 @@ public class TelescopingArm {
     }
 
     public static void pitchToSpecimen() {
-        if (pitch.getCurrentPosition() < 500) {
+        if (pitch.getCurrentPosition() - pitch_home < 300) {
             pitch_home = pitch.getCurrentPosition();
         }
         pitchTargetPosition = pitchSpecimenPosition;
@@ -136,7 +136,7 @@ public class TelescopingArm {
 
         extensionController.setPIDF(extensionP, extensionI, extensionD, extensionF);
         double extensionCurrentPosition = extensionLeft.getCurrentPosition();
-        double power = extensionController.calculate(extensionCurrentPosition, extensionTargetPosition - extension_offset) + extensionF;
+        double power = extensionController.calculate(extensionCurrentPosition, extensionTargetPosition - extension_offset + 150) + extensionF;
         extensionLeft.setPower(power);
         extensionRight.setPower(power);
     }

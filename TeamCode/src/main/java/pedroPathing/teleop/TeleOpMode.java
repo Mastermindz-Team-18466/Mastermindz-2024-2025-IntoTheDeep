@@ -39,6 +39,8 @@ public class TeleOpMode extends LinearOpMode {
         rightRear.setDirection(DcMotor.Direction.REVERSE);
         leftRear.setDirection(DcMotor.Direction.REVERSE);
 
+        pusher.always_zero = false;
+
         leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -221,11 +223,16 @@ public class TeleOpMode extends LinearOpMode {
                 }
             }
 
+            if (currentGamepad1.right_stick_button && !previousGamepad1.right_stick_button) {
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.HALF_OPEN_CLAW);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+            }
+
             if (currentGamepad2.left_bumper && !previousGamepad2.left_bumper) {
                 diffy.resetOffsets();
                 arm.resetOffsets();
-                intakeOuttake.setInstructions(IntakeOuttake.Instructions.SUPER_PUSHER);
-                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                intakeOuttake.setInstructions(IntakeOuttake.Instructions.WALL_SPECIMAN_INTAKE);
+                intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
             }
 
             if (currentGamepad2.right_bumper && !previousGamepad2.right_bumper) {

@@ -36,7 +36,7 @@ import pedroPathing.teleop.TelescopingArm;
  */
 
 @Config
-@Autonomous(name = "Five Specimen", group = "Examples")
+@Autonomous(name = "Three Specimen", group = "Examples")
 public class FiveSpecimen extends OpMode {
     private PoseUpdater poseUpdater;
     private DashboardPoseTracker dashboardPoseTracker;
@@ -65,14 +65,21 @@ public class FiveSpecimen extends OpMode {
 
     private final Pose startPose = new Pose(0, 0, Math.toRadians(0));
     private final Pose scorePose = new Pose(19, 6, Math.toRadians(180));
-    private final Pose one = new Pose(12, -10, Math.toRadians(315));
-    private final Pose oneGo = new Pose(14, -19.5, Math.toRadians(315));
-    private final Pose depoOne = new Pose(14, -19.5, Math.toRadians(225));
-    private final Pose twoGo = new Pose(14, -25.5, Math.toRadians(315));
-    private final Pose depoTwo = new Pose(14, -25.5, Math.toRadians(225));
+    private final Pose one = new Pose(10, -10, Math.toRadians(315));
+    private final Pose oneGo = new Pose(15, -19, Math.toRadians(315));
+    private final Pose depoOne = new Pose(15, -19, Math.toRadians(225));
+    private final Pose twoGo = new Pose(14, -27, Math.toRadians(315));
+    private final Pose depoTwo = new Pose(14, -27, Math.toRadians(225));
+    private final Pose pickUp = new Pose(7.2, -18, Math.toRadians(180));
+    private final Pose pickUpMid = new Pose(12, -14, Math.toRadians(180));
+    private final Pose scorePoseTwo = new Pose(14, 10, Math.toRadians(180));
+    private final Pose backwardPoseTwo = new Pose(20, 10, Math.toRadians(180));
+
+    private final Pose scorePoseThree = new Pose(14, 8, Math.toRadians(180));
+    private final Pose backwardPoseThree = new Pose(20, 8, Math.toRadians(180));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
-    private Path scorePreload, goToOne, goToOneStraight, goToDepoOne, goToTwo, goToDepoTwo, deposit, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;
+    private Path scorePreload, goToOne, goToOneStraight, goToDepoOne, goToTwo, goToTwoStraight, goToPickUpMid, goToPickUpThree, goToDepoTwo, goToPickUp, goToScoreTwo, goBackwardTwo, goToScoreThree, goBackwardThree, stayAtOne, stayAtScoreTwo, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -97,7 +104,7 @@ public class FiveSpecimen extends OpMode {
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
-        goToOne = new Path(new BezierLine(new Point(startPose), new Point(one)));
+        goToOne = new Path(new BezierLine(new Point(scorePose), new Point(one)));
         goToOne.setLinearHeadingInterpolation(scorePose.getHeading(), one.getHeading());
 
         goToOneStraight = new Path(new BezierLine(new Point(one), new Point(oneGo)));
@@ -106,14 +113,35 @@ public class FiveSpecimen extends OpMode {
         goToDepoOne = new Path(new BezierLine(new Point(oneGo), new Point(depoOne)));
         goToDepoOne.setConstantHeadingInterpolation(depoOne.getHeading());
 
-        goToTwo = new Path(new BezierLine(new Point(depoOne), new Point(twoGo)));
-        goToTwo.setLinearHeadingInterpolation(depoOne.getHeading(), twoGo.getHeading());
+        goToTwo = new Path(new BezierLine(new Point(depoOne), new Point(depoOne)));
+        goToTwo.setConstantHeadingInterpolation(twoGo.getHeading());
+
+        goToTwoStraight = new Path(new BezierLine(new Point(depoOne), new Point(twoGo)));
+        goToTwoStraight.setLinearHeadingInterpolation(twoGo.getHeading(), twoGo.getHeading());
 
         goToDepoTwo = new Path(new BezierLine(new Point(twoGo), new Point(depoTwo)));
         goToDepoTwo.setConstantHeadingInterpolation(depoTwo.getHeading());
 
-        nothing = new Path(new BezierLine(new Point(oneGo), new Point(oneGo)));
-        nothing.setLinearHeadingInterpolation(oneGo.getHeading(), oneGo.getHeading());
+        goToPickUp = new Path(new BezierLine(new Point(depoTwo), new Point(pickUp)));
+        goToPickUp.setLinearHeadingInterpolation(depoTwo.getHeading(), pickUp.getHeading());
+
+        goToPickUpMid = new Path(new BezierLine(new Point(backwardPoseTwo), new Point(pickUpMid)));
+        goToPickUpMid.setLinearHeadingInterpolation(backwardPoseTwo.getHeading(), pickUpMid.getHeading());
+
+        goToPickUpThree = new Path(new BezierLine(new Point(pickUpMid), new Point(pickUp)));
+        goToPickUpThree.setLinearHeadingInterpolation(pickUpMid.getHeading(), pickUp.getHeading());
+
+        goToScoreTwo = new Path(new BezierLine(new Point(pickUp), new Point(scorePoseTwo)));
+        goToScoreTwo.setLinearHeadingInterpolation(pickUp.getHeading(), scorePoseTwo.getHeading());
+
+        goBackwardTwo = new Path(new BezierLine(new Point(scorePoseTwo), new Point(backwardPoseTwo)));
+        goBackwardTwo.setLinearHeadingInterpolation(scorePoseTwo.getHeading(), backwardPoseTwo.getHeading());
+
+        goToScoreThree = new Path(new BezierLine(new Point(pickUp), new Point(scorePoseThree)));
+        goToScoreThree.setLinearHeadingInterpolation(pickUp.getHeading(), scorePoseThree.getHeading());
+
+        goBackwardThree = new Path(new BezierLine(new Point(scorePoseTwo), new Point(backwardPoseThree)));
+        goBackwardThree.setLinearHeadingInterpolation(scorePoseTwo.getHeading(), backwardPoseThree.getHeading());
     }
 
     /** This switch is called continuously and runs the pathing, at certain points, it triggers the action state.
@@ -129,7 +157,7 @@ public class FiveSpecimen extends OpMode {
                 follower.followPath(scorePreload, true);
                 setPathState(1);
             case 1:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if (pathTimer.getElapsedTimeSeconds() > 1.5 && follower.getPose().getX() > (scorePose.getX() - 0.5) && follower.getPose().getY() > (scorePose.getY() - 0.5)) {
                     diffy.resetOffsets();
                     arm.resetOffsets();
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
@@ -138,14 +166,14 @@ public class FiveSpecimen extends OpMode {
                 }
                 break;
             case 2:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
                     setPathState(3);
                 }
                 break;
             case 3:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 1) && follower.getPose().getY() > (scorePose.getY() - 1)) {
                     diffy.resetOffsets();
                     arm.resetOffsets();
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_HOLD);
@@ -154,13 +182,13 @@ public class FiveSpecimen extends OpMode {
                 }
                 break;
             case 4:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (scorePose.getX() - 2) && follower.getPose().getY() > (scorePose.getY() - 2)) {
                     follower.followPath(goToOne, true);
                     setPathState(5);
                 }
                 break;
             case 5:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (one.getX() - 2) && follower.getPose().getY() > (one.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.SUPER_PUSHER);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
                     follower.followPath(goToOneStraight, true);
@@ -168,48 +196,49 @@ public class FiveSpecimen extends OpMode {
                 }
                 break;
             case 6:
-                if(pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
-                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_DIFFY);
                     setPathState(7);
                 }
                 break;
             case 7:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.75 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
                     setPathState(8);
                 }
                 break;
             case 8:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.3 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(9);
                 }
                 break;
             case 9:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
-                    follower.followPath(goToDepoOne);
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    follower.followPath(goToDepoOne, true);
                     setPathState(10);
                 }
                 break;
             case 10:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
                     setPathState(11);
                 }
                 break;
             case 11:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    arm.pitch_home = arm.pitch.getCurrentPosition();
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(12);
                 }
                 break;
             case 12:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.SUPER_PUSHER);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
                     follower.followPath(goToTwo, true);
@@ -217,40 +246,182 @@ public class FiveSpecimen extends OpMode {
                 }
                 break;
             case 13:
-                if(pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
-                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (oneGo.getX() - 2) && follower.getPose().getY() > (oneGo.getY() - 2)) {
+                    follower.followPath(goToTwoStraight, true);
                     setPathState(14);
                 }
                 break;
             case 14:
-                if(pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
-                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+                if (pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_DIFFY);
                     setPathState(15);
                 }
                 break;
             case 15:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
-                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
-                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                if (pathTimer.getElapsedTimeSeconds() > 0.75 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
                     setPathState(16);
                 }
                 break;
             case 16:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
-                    follower.followPath(goToDepoTwo);
+                if (pathTimer.getElapsedTimeSeconds() > 0.3 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(17);
                 }
                 break;
             case 17:
-                if(pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    follower.followPath(goToDepoTwo, true);
+                    setPathState(18);
+                }
+                break;
+            case 18:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
                     intakeOuttake.setInstructions(IntakeOuttake.Instructions.INTAKE);
                     intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
+                    setPathState(19);
+                }
+                break;
+            case 19:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                    setPathState(20);
+                }
+                break;
+            case 20:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.CLOSE_PUSHER);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PUSHER_OPEN);
+                    setPathState(21);
+                }
+                break;
+            case 21:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (twoGo.getX() - 2) && follower.getPose().getY() > (twoGo.getY() - 2)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    follower.followPath(goToPickUp, true);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.WALL_SPECIMAN_INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
+                    setPathState(22);
+                }
+                break;
+            case 22:
+                if (pathTimer.getElapsedTimeSeconds() > 1.5 && follower.getPose().getX() > (pickUp.getX() - 2) && follower.getPose().getY() > (pickUp.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HALF_OPEN_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+                    setPathState(23);
+                }
+                break;
+            case 23:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (pickUp.getX() - 2) && follower.getPose().getY() > (pickUp.getY() - 2)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_SPECIMAN_DEPOSIT_TWO);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
+                    follower.followPath(goToScoreTwo, true);
+                    setPathState(24);
+                }
+                break;
+            case 24:
+                if (pathTimer.getElapsedTimeSeconds() > 1.5 && follower.getPose().getX() > (scorePoseTwo.getX() - 0.5) && follower.getPose().getY() > (scorePoseTwo.getY() - 0.5)) {
+                    follower.followPath(goBackwardTwo, true);
+                    setPathState(25);
+                }
+                break;
+            case 25:
+                if (pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (backwardPoseTwo.getX() - 0.5) && follower.getPose().getY() > (backwardPoseTwo.getY() - 0.5)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
+                    setPathState(26);
+                }
+                break;
+            case 26:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (backwardPoseTwo.getX() - 3) && follower.getPose().getY() > (backwardPoseTwo.getY() - 3)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
+                    setPathState(27);
+                }
+                break;
+            case 27:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (backwardPoseTwo.getX() - 3) && follower.getPose().getY() > (backwardPoseTwo.getY() - 3)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
+                    setPathState(28);
+                }
+                break;
+            case 28:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (backwardPoseTwo.getX() - 2) && follower.getPose().getY() > (backwardPoseTwo.getY() - 2)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    follower.followPath(goToPickUpMid, true);
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.WALL_SPECIMAN_INTAKE);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.INTAKE_EXTENSION);
+                    setPathState(29);
+                }
+                break;
+            case 29:
+                if (pathTimer.getElapsedTimeSeconds() > 1.5 && follower.getPose().getX() > (pickUpMid.getX() - 3) && follower.getPose().getY() > (pickUpMid.getY() - 3)) {
+                    follower.followPath(goToPickUp, true);
+                    setPathState(30);
+                }
+                break;
+            case 30:
+                if (pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (pickUp.getX() - 2) && follower.getPose().getY() > (pickUp.getY() - 2)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.HALF_OPEN_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.CLOSE_CLAW);
+                    setPathState(31);
+                }
+                break;
+            case 31:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (pickUp.getX() - 2) && follower.getPose().getY() > (pickUp.getY() - 2)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_SPECIMAN_DEPOSIT_TWO);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.PITCH_DEPOSIT);
+                    follower.followPath(goToScoreThree, true);
+                    setPathState(32);
+                }
+                break;
+            case 32:
+                if (pathTimer.getElapsedTimeSeconds() > 2 && follower.getPose().getX() > (scorePoseThree.getX() - 0.5) && follower.getPose().getY() > (scorePoseThree.getY() - 0.5)) {
+                    follower.followPath(goBackwardThree, true);
+                    setPathState(33);
+                }
+                break;
+            case 33:
+                if (pathTimer.getElapsedTimeSeconds() > 1 && follower.getPose().getX() > (backwardPoseThree.getX() - 0.5) && follower.getPose().getY() > (backwardPoseThree.getY() - 0.5)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.SPECIMAN_DEPOSIT_DOWN);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.SPECIMAN_EXTEND);
+                    setPathState(34);
+                }
+                break;
+            case 34:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (backwardPoseThree.getX() - 3) && follower.getPose().getY() > (backwardPoseThree.getY() - 3)) {
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.OPEN_CLAW);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.OPEN_CLAW);
+                    setPathState(35);
+                }
+                break;
+            case 35:
+                if (pathTimer.getElapsedTimeSeconds() > 0.5 && follower.getPose().getX() > (backwardPoseThree.getX() - 3) && follower.getPose().getY() > (backwardPoseThree.getY() - 3)) {
+                    diffy.resetOffsets();
+                    arm.resetOffsets();
+                    intakeOuttake.setInstructions(IntakeOuttake.Instructions.AUTO_HOLD);
+                    intakeOuttake.setSpecificInstruction(IntakeOuttake.SpecificInstructions.MAX_RETRACT);
                     setPathState(-1);
                 }
                 break;
-        }
+           }
     }
 
     /** These change the states of the paths and actions
