@@ -24,9 +24,9 @@ public class TelescopingArm {
     private static final double extensionP = 0.005, extensionI = 0, extensionD = 0.00001;
     private static final double extensionF = 0.00004;
     private static final double retractedBound = -50;
-    private static final double extendedBound = -1520;
+    private static final double extendedBound = -1720;
     private static final double extensionRetractedPosition = -50;
-    private static final double extensionExtendedPosition = -1520;
+    private static final double extensionExtendedPosition = -1720;
     private static final double extensionSpecimanPosition = -150;
     private static final double extensionSpecimanDownPosition = -50;
     public static int extension_offset = 0;

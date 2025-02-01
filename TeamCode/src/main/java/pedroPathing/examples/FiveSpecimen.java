@@ -75,8 +75,8 @@ public class FiveSpecimen extends OpMode {
     private final Pose scorePoseTwo = new Pose(14, 10, Math.toRadians(180));
     private final Pose backwardPoseTwo = new Pose(20, 10, Math.toRadians(180));
 
-    private final Pose scorePoseThree = new Pose(14, 8, Math.toRadians(180));
-    private final Pose backwardPoseThree = new Pose(20, 8, Math.toRadians(180));
+    private final Pose scorePoseThree = new Pose(14, 13, Math.toRadians(180));
+    private final Pose backwardPoseThree = new Pose(20, 13, Math.toRadians(180));
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path scorePreload, goToOne, goToOneStraight, goToDepoOne, goToTwo, goToTwoStraight, goToPickUpMid, goToPickUpThree, goToDepoTwo, goToPickUp, goToScoreTwo, goBackwardTwo, goToScoreThree, goBackwardThree, stayAtOne, stayAtScoreTwo, moveForward, onePath, depositFromOne, twoPath, depositFromTwo, threePath, nothing;

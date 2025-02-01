@@ -10,7 +10,7 @@ public class Differential {
     static final double[] deposit = new double[]{0.45, 0.55};
     static final double[] specimanDeposit = new double[]{0.325, 0.675};
     static final double[] specimanDepositTwo = new double[]{0.3, 0.7};
-    static final double[] specimanIntake = new double[]{0.7, 0.3};
+    static final double[] specimanIntake = new double[]{0.65, 0.35};
     static final double[] specimanDepositDown = new double[]{0.3, 0.7};
     static final double[] mid = new double[]{0.45, 0.65};
     static final double[] close = new double[]{1, 0};

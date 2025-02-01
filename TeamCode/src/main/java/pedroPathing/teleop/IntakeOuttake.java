@@ -240,7 +240,7 @@ public class IntakeOuttake {
                     case INTAKE_EXTENSION:
                         diffy.setPosition(0.55, 0.45);
                         claw.half();
-                        arm.pitchTo(510);
+                        arm.pitchTo(600);
                         arm.extendTo(-80);
                         reset(SpecificInstructions.INTAKE_DIFFY);
                         break;
